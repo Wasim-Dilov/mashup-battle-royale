@@ -44,6 +44,8 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
 #spectator-bar .spec-hint { color:#666; font-size:11px; display:block; margin-top:4px; }
 .controls-help { color:#555; font-size:11px; margin-top:10px; }
 .controls-help span { color:#0ff; }
+.creator-credit { color:#e94560; font-size:11px; margin-top:10px; animation: pulse-glow 2s ease-in-out infinite; letter-spacing:1px; }
+@keyframes pulse-glow { 0%,100%{ opacity:0.5; text-shadow:0 0 4px rgba(233,69,96,0.3); } 50%{ opacity:1; text-shadow:0 0 12px rgba(233,69,96,0.7); } }
 #fullscreen-btn { position:fixed; top:10px; right:10px; background:rgba(0,0,0,0.7); color:#0ff; border:1px solid #0ff; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:12px; z-index:100; pointer-events:auto; transition:all 0.2s; }
 #fullscreen-btn:hover { background:#0ff; color:#000; }
 #mute-btn { position:fixed; top:10px; left:10px; background:rgba(0,0,0,0.7); color:#0ff; border:1px solid #0ff; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:12px; z-index:100; pointer-events:auto; transition:all 0.2s; }
@@ -65,8 +67,8 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
   }
   #char-select h1 { font-size: 20px !important; margin-bottom: 2px !important; }
   #char-select .subtitle { font-size: 11px !important; margin-bottom: 10px !important; }
-  .hero-grid { gap: 6px !important; }
-  .hero-grid .hero-card { flex: 0 0 calc(33.333% - 4px) !important; }
+  .hero-grid { gap: 6px !important; justify-content: center !important; }
+  .hero-grid .hero-card { flex: 0 0 calc(25% - 5px) !important; min-width: 70px !important; }
   .hero-card { padding: 6px !important; }
   .hero-card .preview { height: 50px !important; }
   .hero-card .name { font-size: 11px !important; }
@@ -114,11 +116,11 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
 }
 #touch-controls { display: none; position: fixed; bottom: 0; left: 0; right: 0; top: 0; pointer-events: none; z-index: 50; }
 #touch-controls.active { display: block; }
-.touch-btn { position: absolute; pointer-events: auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: #fff; user-select: none; -webkit-user-select: none; opacity: 0.6; border: 2px solid rgba(255,255,255,0.3); }
-.touch-btn:active, .touch-btn.pressed { opacity: 0.9; transform: scale(0.92); }
-#joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 140px; height: 140px; pointer-events: auto; }
-#joystick-base { width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15); position: absolute; }
-#joystick-thumb { width: 50px; height: 50px; border-radius: 50%; background: rgba(0,255,255,0.5); border: 2px solid rgba(0,255,255,0.8); position: absolute; top: 45px; left: 45px; pointer-events: none; }
+.touch-btn { position: absolute; pointer-events: auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #fff; user-select: none; -webkit-user-select: none; opacity: 0.7; border: 2px solid rgba(255,255,255,0.4); text-shadow: 0 1px 3px rgba(0,0,0,0.8); box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15); transition: transform 0.1s, opacity 0.1s, box-shadow 0.1s; }
+.touch-btn:active, .touch-btn.pressed { opacity: 0.95; transform: scale(0.88); box-shadow: 0 1px 4px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.2); }
+#joystick-zone { position: absolute; bottom: 20px; left: 20px; width: 150px; height: 150px; pointer-events: auto; }
+#joystick-base { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.12), rgba(255,255,255,0.03)); border: 2px solid rgba(255,255,255,0.18); position: absolute; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
+#joystick-thumb { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(0,255,255,0.7), rgba(0,200,200,0.4)); border: 2px solid rgba(0,255,255,0.85); position: absolute; top: 47px; left: 47px; pointer-events: none; box-shadow: 0 0 12px rgba(0,255,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: transform 0.05s; }
 </style>
 <link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#e94560"></head>
 <body>
@@ -140,10 +142,6 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
     <div style="margin:8px 0;">
       <button id="random-btn" onclick="randomHero()" style="background:linear-gradient(135deg,#0ff,#0088aa);color:#000;border:none;padding:8px 24px;font-size:14px;border-radius:20px;cursor:pointer;font-weight:bold;letter-spacing:1px;transition:all 0.3s;">🎲 RANDOM HERO</button>
     </div>
-    <div style="margin:8px 0;">
-      <button id="quick-play-btn" onclick="quickPlay()" style="background:linear-gradient(135deg,#ff6b35,#e94560);color:#fff;border:none;padding:12px 36px;font-size:16px;border-radius:20px;cursor:pointer;font-weight:bold;letter-spacing:1px;">⚡ QUICK PLAY ⚡</button>
-    </div>
-    <div id="debug-info" style="color:#ff0;font-size:10px;margin-top:4px;"></div>
     <div style="margin:10px 0;">
       <span style="color:#aaa;font-size:13px;">Difficulty: </span>
       <button class="diff-btn" id="diff-easy" onclick="setDifficulty('easy')" style="background:#44ff44;color:#000;border:none;padding:5px 14px;border-radius:12px;cursor:pointer;font-weight:bold;font-size:12px;margin:0 3px;">EASY</button>
@@ -158,7 +156,8 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v3.4</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v3.5</div>
+    <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
     <h1 id="go-title">VICTORY!</h1>
@@ -185,10 +184,10 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
     <div id="joystick-base"></div>
     <div id="joystick-thumb"></div>
   </div>
-  <div class="touch-btn" id="btn-attack" style="bottom:30px;right:30px;width:70px;height:70px;background:rgba(233,69,96,0.5);">ATK</div>
-  <div class="touch-btn" id="btn-super" style="bottom:110px;right:30px;width:56px;height:56px;background:rgba(255,238,0,0.4);font-size:14px;">SUP</div>
-  <div class="touch-btn" id="btn-shield" style="bottom:30px;right:110px;width:56px;height:56px;background:rgba(0,255,255,0.4);font-size:14px;">SHD</div>
-  <div class="touch-btn" id="btn-dash" style="bottom:110px;right:110px;width:48px;height:48px;background:rgba(170,238,255,0.3);font-size:12px;">DSH</div>
+  <div class="touch-btn" id="btn-attack" style="bottom:30px;right:30px;width:72px;height:72px;background:radial-gradient(circle at 40% 40%, rgba(255,100,120,0.6), rgba(233,69,96,0.4));border-color:rgba(233,69,96,0.7);">ATK</div>
+  <div class="touch-btn" id="btn-super" style="bottom:115px;right:30px;width:58px;height:58px;background:radial-gradient(circle at 40% 40%, rgba(255,255,80,0.5), rgba(255,200,0,0.3));border-color:rgba(255,238,0,0.6);font-size:14px;">SUP</div>
+  <div class="touch-btn" id="btn-shield" style="bottom:30px;right:115px;width:58px;height:58px;background:radial-gradient(circle at 40% 40%, rgba(80,255,255,0.5), rgba(0,200,200,0.3));border-color:rgba(0,255,255,0.6);font-size:14px;">SHD</div>
+  <div class="touch-btn" id="btn-dash" style="bottom:115px;right:115px;width:50px;height:50px;background:radial-gradient(circle at 40% 40%, rgba(200,240,255,0.4), rgba(150,200,255,0.2));border-color:rgba(170,238,255,0.5);font-size:12px;">DSH</div>
 </div>
 
 <script>
@@ -479,6 +478,100 @@ const SPRITE_DATA = {
       "0000000000000000"
     ],
     palette: { '1':'#ffffff','2':'#ee4444','3':'#33aa33','4':'#228822','5':'#554422','a':'#55dd55','b':'#ffdd00','c':'#88ff44','e':'#ffccaa','t':'#33aa33','w':'#eeeeee'}
+  },
+  banitsa: {
+    idle: [
+      "0000000000000000",
+      "0000044440000000",
+      "0004433334400000",
+      "0043222223340000",
+      "0432211122340000",
+      "0432112211240000",
+      "4322111112230000",
+      "4321166112230000",
+      "4321166112230000",
+      "4322111112340000",
+      "0432211122340000",
+      "0043222233440000",
+      "0004433344400000",
+      "0000044440000000",
+      "0000000000000000",
+      "0000055550000000",
+      "0000550055000000",
+      "0005500005500000",
+      "0005500005500000",
+      "0000000000000000"
+    ],
+    walk: [
+      "0000000000000000",
+      "0000044440000000",
+      "0004433334400000",
+      "0043222223340000",
+      "0432211122340000",
+      "0432112211240000",
+      "4322111112230000",
+      "4321166112230000",
+      "4321166112230000",
+      "4322111112340000",
+      "0432211122340000",
+      "0043222233440000",
+      "0004433344400000",
+      "0000044440000000",
+      "0000000000000000",
+      "0000055050000000",
+      "0000500005000000",
+      "0005000000500000",
+      "0050000000000000",
+      "0000000000000000"
+    ],
+    palette: { '1':'#e8c35a','2':'#d4a43a','3':'#c08a28','4':'#a06818','5':'#7a5522','6':'#f5e6b8','a':'#f0d060','b':'#fff8dc','c':'#b87820','e':'#ffe4b5','w':'#fffacd'}
+  },
+  lebronJames: {
+    idle: [
+      "0000011100000000",
+      "0000111110000000",
+      "0000111110000000",
+      "0000e88e0e000000",
+      "000e8118e0000000",
+      "000e8888e0000000",
+      "0000eeee00000000",
+      "000p555p00000000",
+      "000p555p00000000",
+      "00pp5g5pp0000000",
+      "00p55555p0000000",
+      "00pp555pp000b000",
+      "000p555p0000b000",
+      "0000ppp0000b0000",
+      "0000444000b00000",
+      "0000444000000000",
+      "0000400400000000",
+      "0004400044000000",
+      "00w4400044w00000",
+      "00ww0000ww000000"
+    ],
+    walk: [
+      "0000011100000000",
+      "0000111110000000",
+      "0000111110000000",
+      "0000e88e0e000000",
+      "000e8118e0000000",
+      "000e8888e0000000",
+      "0000eeee00000000",
+      "000p555p00000000",
+      "000p555p00000000",
+      "00pp5g5pp0000000",
+      "00p55555p0b00000",
+      "00pp555ppb000000",
+      "000p555p00000000",
+      "0000ppp000000000",
+      "0000444000000000",
+      "0000400400000000",
+      "0004000004000000",
+      "00w0000000w00000",
+      "0ww0000000ww0000",
+      "0000000000000000"
+    ],
+    palette: { '1':'#ffffff','2':'#cccccc','3':'#333333','4':'#8b5e3c','5':'#552583','6':'#fdb927','8':'#8b5e3c','b':'#ff6600','e':'#6b3a1f','g':'#fdb927','p':'#552583','t':'#552583','w':'#ffffff'}
   }
 };
 
@@ -581,6 +674,30 @@ const HEROES = [
     superDamage:70, superRange:150,
     projectileColor:null, projectileSpeed:0,
     accessory:"Dino Helmet"
+  },
+  {
+    name:"Banitsa", type:"Bulgarian Pastry", sprite:"banitsa",
+    desc:"A legendary spiral pastry from Bulgaria! Rolls into enemies and sizzles with cheesy power!",
+    color:"#e8c35a", color2:"#d4a43a",
+    hp:650, speed:3.0, attack:20, defense:14,
+    range:70, rangeType:"melee",
+    passive:"Cheese Shield",
+    attackName:"Pastry Roll", superName:"Golden Spiral",
+    superDamage:60, superRange:160,
+    projectileColor:null, projectileSpeed:0,
+    accessory:"Filo Crown"
+  },
+  {
+    name:"LeBron", type:"Basketball Legend", sprite:"lebronJames",
+    desc:"The King himself! Dunks on enemies and shoots long-range three-pointers!",
+    color:"#552583", color2:"#fdb927",
+    hp:600, speed:4.0, attack:22, defense:10,
+    range:250, rangeType:"ranged",
+    passive:"Clutch Gene",
+    attackName:"3-Pointer", superName:"Ultimate Dunk",
+    superDamage:65, superRange:130,
+    projectileColor:"#ff6600", projectileSpeed:9,
+    accessory:"Gold Crown"
   }
 ];
 
@@ -833,6 +950,7 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 let gameRunning=false, spectating=false, playerDeathPlace=0, fighters=[], projectiles=[], particles=[], damageNumbers=[];
+let countdownTimer=0, countdownActive=false;
 let selectedHero=-1, playerIndex=0, shrinkTimer=0;
 let arenaRadius=550, arenaCenterX=600, arenaCenterY=400;
 let frameCount=0, killfeed=[], shakeX=0, shakeY=0;
@@ -1007,8 +1125,8 @@ function spawnWeather() {
 
 let ambientParticles=[];
 // ========== CAMERA SYSTEM ==========
-let cameraZoom = 1;
-let cameraTargetZoom = 1;
+let cameraZoom = isMobile ? 0.55 : 1;
+let cameraTargetZoom = isMobile ? 0.55 : 1;
 let cameraX = 600;
 let cameraY = 400;
 
@@ -1820,9 +1938,6 @@ function selectHero(i) {
   const btn = document.getElementById('start-btn');
   btn.disabled = false;
   btn.removeAttribute('disabled');
-  // Debug
-  const dbg = document.getElementById('debug-info');
-  if(dbg) dbg.textContent = 'Selected: ' + HEROES[i].name + ' | Cards in DOM: ' + document.querySelectorAll('.hero-card').length + ' | isMobile: ' + isMobile;
 }
 function randomHero() {
   const i = Math.floor(Math.random() * HEROES.length);
@@ -1832,17 +1947,6 @@ function randomHero() {
   btn.style.background = 'linear-gradient(135deg,#e94560,#ff6b35)';
   btn.style.color = '#fff';
   setTimeout(() => { btn.textContent = '🎲 RANDOM HERO'; btn.style.background = 'linear-gradient(135deg,#0ff,#0088aa)'; btn.style.color = '#000'; }, 1500);
-}
-function quickPlay() {
-  try {
-    const i = Math.floor(Math.random() * HEROES.length);
-    selectedHero = i;
-    const dbg = document.getElementById('debug-info');
-    if(dbg) dbg.textContent = 'Starting game with ' + HEROES[i].name + '...';
-    startGame();
-  } catch(e) {
-    alert('Quick Play error: ' + e.message + '\n' + e.stack);
-  }
 }
 
 // ========== DIFFICULTY ==========
@@ -2506,7 +2610,7 @@ class Fighter {
   hazards.forEach(h=>{drawables.push({y:h.y||0,draw:()=>h.draw()});});
       }
       // Hero-specific super burst particles
-      const heroColors={blazeKnight:['#ff4400','#ffaa00','#ff6600'],frostbyte:['#00ccff','#aaeeff','#0066ff'],zapWizard:['#9900ff','#cc66ff','#ff00ff'],shadowNinja:['#333','#666','#999'],captainCosmos:['#ff0066','#ff6699','#ffaacc'],rexTitan:['#44ff44','#88ff88','#00cc00']};
+      const heroColors={blazeKnight:['#ff4400','#ffaa00','#ff6600'],frostbyte:['#00ccff','#aaeeff','#0066ff'],zapWizard:['#9900ff','#cc66ff','#ff00ff'],shadowNinja:['#333','#666','#999'],captainCosmos:['#ff0066','#ff6699','#ffaacc'],rexTitan:['#44ff44','#88ff88','#00cc00'],banitsa:['#e8c35a','#d4a43a','#f5e6b8'],lebronJames:['#fdb927','#552583','#ffffff']};
       const sc=heroColors[this.hero.sprite]||[this.hero.color,'#fff','#aaa'];
       for(let i=0;i<24;i++){const a=(Math.PI*2/24)*i;const spd=4+Math.random()*5;particles.push({x:this.x+Math.cos(a)*22,y:this.y+Math.sin(a)*22,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:25+Math.random()*15,color:sc[i%sc.length],size:3+Math.random()*4});}
       for(let i=0;i<16;i++){const a=(Math.PI*2/16)*i;particles.push({x:this.x+Math.cos(a)*22,y:this.y+Math.sin(a)*22,vx:Math.cos(a)*2,vy:Math.sin(a)*2,life:20,color:this.hero.color,size:3});}
@@ -2838,7 +2942,11 @@ function startGame() {
     const fx=arenaCenterX+Math.cos(a)*r,fy=arenaCenterY+Math.sin(a)*r;
     fighters.push(new Fighter(HEROES[used[i]],fx,fy,i===0));
   }
-  playerIndex=0;requestAnimationFrame(gameLoop);
+  playerIndex=0;
+  // Start countdown before game begins
+  countdownTimer = 180; // 3 seconds at 60fps
+  countdownActive = true;
+  requestAnimationFrame(gameLoop);
 }
 
 // ========== AMBIENT PARTICLES SYSTEM ==========
@@ -2959,11 +3067,23 @@ function gameLoop() {
       }
       if (dropDelay > fighters.length + 30) {
         dropPhase = false;
-        gameRunning = true;
+        if (countdownActive) {
+          // Don't start game yet — countdown will handle it
+        } else {
+          gameRunning = true;
+        }
       }
     }
   }
 
+    // Countdown between drop phase and gameplay
+    if (countdownActive && !dropPhase) {
+      countdownTimer--;
+      if (countdownTimer <= 0) {
+        countdownActive = false;
+        gameRunning = true;
+      }
+    }
     if(!gameRunning){updateConfetti();draw();requestAnimationFrame(gameLoop);return;}
   // Slow-mo effect
   if(slowMoTimer>0){slowMoTimer--;if(slowMoTimer<=0)slowMoRate=1;}
@@ -3006,13 +3126,14 @@ function gameLoop() {
   shakeX*=0.85;shakeY*=0.85;
 
   const alive=fighters.filter(f=>f.alive).length;
-    // Update camera zoom
+    // Update camera zoom (mobile starts wider to show full arena)
+    const mobileScale = isMobile ? 0.55 : 1.0;
     if (alive <= 3 && alive > 0) {
-      if (alive === 3) cameraTargetZoom = 1.3;
-      else if (alive === 2) cameraTargetZoom = 1.5;
-      else cameraTargetZoom = 1.8;
+      if (alive === 3) cameraTargetZoom = 1.3 * mobileScale;
+      else if (alive === 2) cameraTargetZoom = 1.5 * mobileScale;
+      else cameraTargetZoom = 1.8 * mobileScale;
     } else {
-      cameraTargetZoom = 1.0;
+      cameraTargetZoom = 1.0 * mobileScale;
     }
     cameraZoom += (cameraTargetZoom - cameraZoom) * 0.05;
     
@@ -3637,6 +3758,37 @@ function draw() {
 
   // Confetti on top of everything (outside ctx.save/restore so no shake)
   drawConfetti();
+
+  // Countdown overlay (3, 2, 1, GO!)
+  if (countdownActive && !dropPhase) {
+    const sec = Math.ceil(countdownTimer / 60);
+    const progress = (countdownTimer % 60) / 60; // 1→0 within each second
+    const text = sec > 0 ? String(sec) : 'GO!';
+    const scale = 1 + progress * 0.5; // pulse from big to normal
+    const alpha = sec > 0 ? 0.9 : Math.max(0, countdownTimer / 60 + 1);
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    // Dark overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Countdown number
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(scale, scale);
+    ctx.font = 'bold 120px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillText(text, 3, 3);
+    // Glow
+    ctx.shadowColor = sec > 0 ? '#e94560' : '#0ff';
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = sec > 0 ? '#e94560' : '#0ff';
+    ctx.fillText(text, 0, 0);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
 }
 
 // ========== 8-BIT PIXEL FONT ==========
