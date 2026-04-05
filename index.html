@@ -13,7 +13,8 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
 #char-select { background:rgba(15,15,35,0.97); border:3px solid #e94560; border-radius:20px; padding:28px; text-align:center; max-width:960px; width:93%; max-height:90vh; overflow-y:auto; }
 #char-select h1 { color:#e94560; font-size:32px; text-shadow:0 0 20px rgba(233,69,96,0.6); margin-bottom:4px; letter-spacing:3px; }
 #char-select .subtitle { color:#aaa; font-size:13px; margin-bottom:18px; }
-.hero-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px; }
+.hero-grid { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px; justify-content:center; }
+.hero-grid .hero-card { flex:0 0 calc(33.333% - 8px); min-width:0; }
 .hero-card { background:rgba(30,30,65,0.9); border:2px solid #333; border-radius:12px; padding:10px; cursor:pointer; transition:all 0.3s; }
 .hero-card:hover { border-color:#e94560; transform:translateY(-2px); box-shadow:0 4px 16px rgba(233,69,96,0.3); }
 .hero-card.selected { border-color:#0ff; box-shadow:0 0 20px rgba(0,255,255,0.4); background:rgba(0,255,255,0.05); }
@@ -64,7 +65,8 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
   }
   #char-select h1 { font-size: 20px !important; margin-bottom: 2px !important; }
   #char-select .subtitle { font-size: 11px !important; margin-bottom: 10px !important; }
-  .hero-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+  .hero-grid { gap: 6px !important; }
+  .hero-grid .hero-card { flex: 0 0 calc(33.333% - 4px) !important; }
   .hero-card { padding: 6px !important; }
   .hero-card .preview { height: 50px !important; }
   .hero-card .name { font-size: 11px !important; }
@@ -156,7 +158,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v3.2</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v3.3</div>
   </div>
   <div id="game-over">
     <h1 id="go-title">VICTORY!</h1>
@@ -1766,8 +1768,9 @@ let touchButtons = { attack: false, super: false, shield: false, dash: false };
 // ========== CHARACTER SELECT ==========
 const heroGrid = document.getElementById('hero-grid');
 // Force hero-grid to be visible
-heroGrid.style.display = 'grid';
-heroGrid.style.gridTemplateColumns = isMobile ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)';
+heroGrid.style.display = 'flex';
+heroGrid.style.flexWrap = 'wrap';
+heroGrid.style.justifyContent = 'center';
 heroGrid.style.gap = isMobile ? '6px' : '12px';
 heroGrid.style.marginBottom = '18px';
 try {
@@ -1776,12 +1779,14 @@ HEROES.forEach((hero,i) => {
   card.className = 'hero-card';
   // Force inline styles for mobile visibility
   card.style.display = 'block';
+  card.style.flex = isMobile ? '0 0 calc(33.333% - 4px)' : '0 0 calc(33.333% - 8px)';
   card.style.background = 'rgba(30,30,65,0.9)';
   card.style.border = '2px solid #555';
   card.style.borderRadius = '12px';
   card.style.padding = isMobile ? '6px' : '10px';
   card.style.cursor = 'pointer';
   card.style.minHeight = isMobile ? '70px' : '100px';
+  card.style.overflow = 'hidden';
   card.onclick = () => selectHero(i);
   const sc = {HP:'#44cc44',ATK:'#ff4444',DEF:'#ffaa00',SPD:'#00d4ff',RNG:'#ff88ff'};
   const stats = [
@@ -1828,10 +1833,15 @@ function randomHero() {
   setTimeout(() => { btn.textContent = '🎲 RANDOM HERO'; btn.style.background = 'linear-gradient(135deg,#0ff,#0088aa)'; btn.style.color = '#000'; }, 1500);
 }
 function quickPlay() {
-  // Pick random hero and start immediately
-  const i = Math.floor(Math.random() * HEROES.length);
-  selectedHero = i;
-  startGame();
+  try {
+    const i = Math.floor(Math.random() * HEROES.length);
+    selectedHero = i;
+    const dbg = document.getElementById('debug-info');
+    if(dbg) dbg.textContent = 'Starting game with ' + HEROES[i].name + '...';
+    startGame();
+  } catch(e) {
+    alert('Quick Play error: ' + e.message + '\n' + e.stack);
+  }
 }
 
 // ========== DIFFICULTY ==========
