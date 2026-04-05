@@ -158,7 +158,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v3.3</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v3.4</div>
   </div>
   <div id="game-over">
     <h1 id="go-title">VICTORY!</h1>
@@ -801,6 +801,12 @@ class SoundManager {
 }
 
 const soundManager = new SoundManager();
+
+// ========== MOBILE DETECTION (must be before resizeCanvas) ==========
+const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+let touchJoystick = { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: null };
+let touchButtons = { attack: false, super: false, shield: false, dash: false };
+
 // ========== GAME STATE ==========
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -1759,11 +1765,6 @@ function spawnCrates() {
     crates.push(new Crate(x,y));
   }
 }
-
-// ========== MOBILE DETECTION ==========
-const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-let touchJoystick = { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: null };
-let touchButtons = { attack: false, super: false, shield: false, dash: false };
 
 // ========== CHARACTER SELECT ==========
 const heroGrid = document.getElementById('hero-grid');
