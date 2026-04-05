@@ -1,0 +1,14 @@
+{
+  "name": "Mashup Battle Royale",
+  "short_name": "Battle Royale",
+  "description": "10 fighters enter the arena. Only 1 leaves alive!",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1a3a1a",
+  "theme_color": "#e94560",
+  "icons": [
+    {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}
