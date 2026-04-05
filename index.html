@@ -4,12 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MASHUP BATTLE ROYALE!</title>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#e94560">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Battle Royale">
-<link rel="apple-touch-icon" href="/icon-192.png">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #1a3a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; position: relative; }
@@ -23,7 +17,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
 .hero-card { background:rgba(30,30,65,0.9); border:2px solid #333; border-radius:12px; padding:10px; cursor:pointer; transition:all 0.3s; }
 .hero-card:hover { border-color:#e94560; transform:translateY(-2px); box-shadow:0 4px 16px rgba(233,69,96,0.3); }
 .hero-card.selected { border-color:#0ff; box-shadow:0 0 20px rgba(0,255,255,0.4); background:rgba(0,255,255,0.05); }
-.hero-card .preview { height:68px; display:flex;align-items:center;justify-content:center; margin-bottom:4px; }
+.hero-card .preview { height:68px; display:flex;align-items:center;justify-content:center; margin-bottom:4px; overflow:hidden; }
 .hero-card .preview canvas { image-rendering:pixelated; }
 .hero-card .name { color:#fff; font-size:14px; font-weight:bold; }
 .hero-card .type { color:#e94560; font-size:9px; text-transform:uppercase; letter-spacing:1px; }
@@ -82,14 +76,20 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
   #start-btn { padding: 10px 30px !important; font-size: 16px !important; }
   .controls-help { display: none !important; }
 
-  /* === GAMEPLAY: canvas fills viewport, no border === */
-  canvas {
+  /* === GAMEPLAY: game canvas fills viewport, no border === */
+  canvas#game {
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     width: 100vw !important;
     height: 100vh !important;
     object-fit: contain;
+  }
+  /* Keep preview canvases inside hero cards small */
+  .hero-card .preview canvas {
+    width: auto !important;
+    height: 100% !important;
+    max-height: 50px !important;
   }
 
   /* === BUTTONS: reposition for mobile === */
@@ -118,6 +118,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
 #joystick-base { width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.15); position: absolute; }
 #joystick-thumb { width: 50px; height: 50px; border-radius: 50%; background: rgba(0,255,255,0.5); border: 2px solid rgba(0,255,255,0.8); position: absolute; top: 45px; left: 45px; pointer-events: none; }
 </style>
+<link rel="manifest" href="/manifest.json"><link rel="apple-touch-icon" href="/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#e94560">
 </head>
 <body>
 <canvas id="game" width="1200" height="800"></canvas>
