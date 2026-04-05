@@ -135,6 +135,9 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
     <h1>⚔️ MASHUP BATTLE ROYALE ⚔️</h1>
     <p class="subtitle">10 fighters enter the arena. Only 1 leaves alive. Choose your hero!</p>
     <div class="hero-grid" id="hero-grid"></div>
+    <div style="margin:8px 0;">
+      <button id="random-btn" onclick="randomHero()" style="background:linear-gradient(135deg,#0ff,#0088aa);color:#000;border:none;padding:8px 24px;font-size:14px;border-radius:20px;cursor:pointer;font-weight:bold;letter-spacing:1px;transition:all 0.3s;">🎲 RANDOM HERO</button>
+    </div>
     <div style="margin:10px 0;">
       <span style="color:#aaa;font-size:13px;">Difficulty: </span>
       <button class="diff-btn" id="diff-easy" onclick="setDifficulty('easy')" style="background:#44ff44;color:#000;border:none;padding:5px 14px;border-radius:12px;cursor:pointer;font-weight:bold;font-size:12px;margin:0 3px;">EASY</button>
@@ -149,6 +152,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v3.1</div>
   </div>
   <div id="game-over">
     <h1 id="go-title">VICTORY!</h1>
@@ -1804,6 +1808,16 @@ function selectHero(i) {
   selectedHero=i;
   document.querySelectorAll('.hero-card').forEach((c,j)=>c.classList.toggle('selected',j===i));
   document.getElementById('start-btn').disabled=false;
+}
+function randomHero() {
+  const i = Math.floor(Math.random() * HEROES.length);
+  selectHero(i);
+  // Flash the random button
+  const btn = document.getElementById('random-btn');
+  btn.textContent = '🎲 ' + HEROES[i].name.toUpperCase() + '!';
+  btn.style.background = 'linear-gradient(135deg,#e94560,#ff6b35)';
+  btn.style.color = '#fff';
+  setTimeout(() => { btn.textContent = '🎲 RANDOM HERO'; btn.style.background = 'linear-gradient(135deg,#0ff,#0088aa)'; btn.style.color = '#000'; }, 1500);
 }
 
 // ========== DIFFICULTY ==========
