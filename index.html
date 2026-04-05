@@ -85,9 +85,13 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100vw !important;
+    height: 100dvh !important;
     height: 100vh !important;
-    object-fit: contain;
+    z-index: 1 !important;
   }
   /* Keep preview canvases inside hero cards small */
   .hero-card .preview canvas {
@@ -156,7 +160,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v3.6</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v3.7</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -711,14 +715,22 @@ class SoundManager {
   }
   
   initAudio() {
-    if (this.audioContext) {
-      if (this.audioContext.state === 'suspended') this.audioContext.resume();
-      return;
-    }
-    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    this.masterGain = this.audioContext.createGain();
-    this.masterGain.connect(this.audioContext.destination);
-    if (this.audioContext.state === 'suspended') this.audioContext.resume();
+    try {
+      if (this.audioContext) {
+        if (this.audioContext.state === 'suspended') {
+          this.audioContext.resume().catch(()=>{});
+        }
+        return;
+      }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.audioContext = new AC();
+      this.masterGain = this.audioContext.createGain();
+      this.masterGain.connect(this.audioContext.destination);
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume().catch(()=>{});
+      }
+    } catch(e) { console.warn('Audio init failed:', e); }
   }
   
   playSound(type, volume = 0.3) {
@@ -1941,6 +1953,8 @@ function selectHero(i) {
   const btn = document.getElementById('start-btn');
   btn.disabled = false;
   btn.removeAttribute('disabled');
+  // Pre-init audio on hero select (user gesture)
+  initSound();
 }
 function randomHero() {
   const i = Math.floor(Math.random() * HEROES.length);
