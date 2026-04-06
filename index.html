@@ -157,7 +157,7 @@ canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v4.0</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v4.1</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -3361,12 +3361,12 @@ function draw() {
   const halfW = canvas.width / 2, halfH = canvas.height / 2;
   ctx.translate(halfW, halfH);
   ctx.scale(cameraZoom, cameraZoom);
-  ctx.translate(-(cameraX - halfW) + shakeX/cameraZoom, -(cameraY - halfH) + shakeY/cameraZoom);
+  ctx.translate(-cameraX + shakeX/cameraZoom, -cameraY + shakeY/cameraZoom);
 
-  // Outer dead zone (dark, barren)
+  // Outer dead zone (dark, barren) — oversized rect to cover all visible area regardless of camera pos
   const outerGrad=ctx.createRadialGradient(arenaCenterX,arenaCenterY,arenaRadius-20,arenaCenterX,arenaCenterY,arenaRadius+80);
   outerGrad.addColorStop(0,'#1a3a1a');outerGrad.addColorStop(1,'#0a180a');
-  ctx.fillStyle=outerGrad;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle=outerGrad;ctx.fillRect(arenaCenterX-1200,arenaCenterY-800,2400,1600);
 
   // Rich arena floor with multiple gradient layers
   const fg=ctx.createRadialGradient(arenaCenterX,arenaCenterY,0,arenaCenterX,arenaCenterY,arenaRadius);
@@ -3549,7 +3549,10 @@ function draw() {
   });
   ctx.globalAlpha=1;
 
-  // === HUD ===
+  // END WORLD DRAWING — restore camera transform, everything below is SCREEN SPACE
+  ctx.restore();
+
+  // === HUD (screen space — coordinates are screen pixels) ===
   const alive=fighters.filter(f=>f.alive).length;
   // Top bar - alive count
   const topBarW=140,topBarH=30,topBarX=canvas.width/2-topBarW/2,topBarY=5;
@@ -3793,9 +3796,7 @@ function draw() {
     ctx.textAlign='left';
   }
 
-  ctx.restore();
-
-  // Confetti on top of everything (outside ctx.save/restore so no shake)
+  // Confetti on top of everything
   drawConfetti();
 
   // Countdown overlay (3, 2, 1, GO!)
