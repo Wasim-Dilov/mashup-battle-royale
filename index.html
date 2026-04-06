@@ -157,7 +157,7 @@ canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v3.9</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v4.0</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -946,24 +946,24 @@ const ctx = canvas.getContext('2d');
 function resizeCanvas() {
   const w = window.innerWidth || document.documentElement.clientWidth;
   const h = window.innerHeight || document.documentElement.clientHeight;
-  const aspect = 1200 / 800; // 1.5
 
   if (isMobile) {
-    // Mobile: fill entire screen, maintain aspect ratio, center with letterboxing
-    let cw, ch;
-    if (w / h > aspect) {
-      ch = h; cw = Math.round(h * aspect);
-    } else {
-      cw = w; ch = Math.round(w / aspect);
-    }
+    // Mobile: fill the ENTIRE screen — adjust internal canvas resolution to match screen ratio
+    // Keep height at 800, scale width to match actual screen aspect ratio
+    const screenAspect = w / h;
+    canvas.width = Math.round(800 * screenAspect);
+    canvas.height = 800;
+    // CSS: fill viewport edge-to-edge
     canvas.style.position = 'fixed';
-    canvas.style.left = Math.round((w - cw) / 2) + 'px';
-    canvas.style.top = Math.round((h - ch) / 2) + 'px';
-    canvas.style.width = cw + 'px';
-    canvas.style.height = ch + 'px';
+    canvas.style.left = '0px';
+    canvas.style.top = '0px';
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
     canvas.style.margin = '0';
   } else {
-    // Desktop: let flexbox center it, constrain to viewport
+    // Desktop: fixed 1200x800, let flexbox center it
+    canvas.width = 1200;
+    canvas.height = 800;
     canvas.style.position = '';
     canvas.style.left = '';
     canvas.style.top = '';
@@ -3358,9 +3358,10 @@ function draw() {
   ctx.fillStyle='#0e280e';ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.save();
   // Camera transform: translate to screen center, scale, then move world so camera target is at center
-  ctx.translate(600, 400);
+  const halfW = canvas.width / 2, halfH = canvas.height / 2;
+  ctx.translate(halfW, halfH);
   ctx.scale(cameraZoom, cameraZoom);
-  ctx.translate(-(cameraX - 600) + shakeX/cameraZoom, -(cameraY - 400) + shakeY/cameraZoom);
+  ctx.translate(-(cameraX - halfW) + shakeX/cameraZoom, -(cameraY - halfH) + shakeY/cameraZoom);
 
   // Outer dead zone (dark, barren)
   const outerGrad=ctx.createRadialGradient(arenaCenterX,arenaCenterY,arenaRadius-20,arenaCenterX,arenaCenterY,arenaRadius+80);
