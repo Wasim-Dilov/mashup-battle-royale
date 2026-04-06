@@ -6,8 +6,8 @@
 <title>MASHUP BATTLE ROYALE!</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #1a3a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; position: relative; }
-canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rgba(233,69,96,0.4); image-rendering: pixelated; max-width: 100vw; max-height: 100vh; touch-action: none; }
+body { background: #1a3a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; position: relative; margin: 0; padding: 0; }
+canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rgba(233,69,96,0.4); image-rendering: pixelated; touch-action: none; display: block; }
 #ui-overlay { position: absolute; top:0;left:0;right:0;bottom:0; display:flex;justify-content:center;align-items:center; pointer-events:none; z-index:20; }
 #ui-overlay > * { pointer-events: auto; }
 #char-select { background:rgba(15,15,35,0.97); border:3px solid #e94560; border-radius:20px; padding:28px; text-align:center; max-width:960px; width:93%; max-height:90vh; overflow-y:auto; }
@@ -81,11 +81,14 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
   .controls-help { display: none !important; }
 
   /* === GAMEPLAY: game canvas sized by JS, no border === */
+  body { display: block !important; }
   canvas#game {
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     z-index: 1 !important;
+    position: fixed !important;
+    margin: 0 !important;
   }
   /* Keep preview canvases inside hero cards small */
   .hero-card .preview canvas {
@@ -120,7 +123,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
 #joystick-base { width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.12), rgba(255,255,255,0.03)); border: 2px solid rgba(255,255,255,0.18); position: absolute; box-shadow: inset 0 0 20px rgba(0,0,0,0.2); }
 #joystick-thumb { width: 56px; height: 56px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(0,255,255,0.7), rgba(0,200,200,0.4)); border: 2px solid rgba(0,255,255,0.85); position: absolute; top: 47px; left: 47px; pointer-events: none; box-shadow: 0 0 12px rgba(0,255,255,0.4), inset 0 1px 0 rgba(255,255,255,0.3); transition: transform 0.05s; }
 </style>
-<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#e94560"></head>
+</head>
 <body>
 <canvas id="game" width="1200" height="800"></canvas>
 <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
@@ -154,7 +157,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v3.8</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v3.9</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -710,19 +713,25 @@ class SoundManager {
   
   initAudio() {
     try {
-      if (this.audioContext) {
-        if (this.audioContext.state === 'suspended') {
-          this.audioContext.resume().catch(()=>{});
-        }
-        return;
-      }
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
-      this.audioContext = new AC();
-      this.masterGain = this.audioContext.createGain();
-      this.masterGain.connect(this.audioContext.destination);
+      if (!this.audioContext) {
+        this.audioContext = new AC();
+        this.masterGain = this.audioContext.createGain();
+        this.masterGain.connect(this.audioContext.destination);
+      }
+      // Always try to resume (mobile requires this in a user gesture)
       if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume().catch(()=>{});
+        this.audioContext.resume().then(() => {
+          // Play a tiny silent buffer to fully unlock audio on iOS/Android
+          try {
+            const buf = this.audioContext.createBuffer(1, 1, 22050);
+            const src = this.audioContext.createBufferSource();
+            src.buffer = buf;
+            src.connect(this.audioContext.destination);
+            src.start(0);
+          } catch(e) {}
+        }).catch(()=>{});
       }
     } catch(e) { console.warn('Audio init failed:', e); }
   }
@@ -935,27 +944,33 @@ const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 // Responsive canvas scaling
 function resizeCanvas() {
-  const w = window.innerWidth, h = window.innerHeight;
-  const aspect = 1200 / 800;
-  let cw, ch;
-
-  if (w / h > aspect) {
-    // Screen is wider than game — fit to height, center horizontally
-    ch = h;
-    cw = Math.floor(h * aspect);
-  } else {
-    // Screen is taller than game — fit to width, center vertically
-    cw = w;
-    ch = Math.floor(w / aspect);
-  }
-
-  canvas.style.width = cw + 'px';
-  canvas.style.height = ch + 'px';
+  const w = window.innerWidth || document.documentElement.clientWidth;
+  const h = window.innerHeight || document.documentElement.clientHeight;
+  const aspect = 1200 / 800; // 1.5
 
   if (isMobile) {
+    // Mobile: fill entire screen, maintain aspect ratio, center with letterboxing
+    let cw, ch;
+    if (w / h > aspect) {
+      ch = h; cw = Math.round(h * aspect);
+    } else {
+      cw = w; ch = Math.round(w / aspect);
+    }
     canvas.style.position = 'fixed';
-    canvas.style.left = Math.floor((w - cw) / 2) + 'px';
-    canvas.style.top = Math.floor((h - ch) / 2) + 'px';
+    canvas.style.left = Math.round((w - cw) / 2) + 'px';
+    canvas.style.top = Math.round((h - ch) / 2) + 'px';
+    canvas.style.width = cw + 'px';
+    canvas.style.height = ch + 'px';
+    canvas.style.margin = '0';
+  } else {
+    // Desktop: let flexbox center it, constrain to viewport
+    canvas.style.position = '';
+    canvas.style.left = '';
+    canvas.style.top = '';
+    canvas.style.maxWidth = '100vw';
+    canvas.style.maxHeight = '100vh';
+    canvas.style.width = '';
+    canvas.style.height = '';
   }
 }
 window.addEventListener('resize', resizeCanvas);
@@ -4051,6 +4066,12 @@ window.addEventListener('resize', checkOrientation);
 document.addEventListener('click', () => { initSound(); }, { once: true });
 document.addEventListener('keydown', () => { initSound(); }, { once: true });
 document.addEventListener('touchstart', () => { initSound(); }, { once: true });
+// Mobile: keep trying to unlock audio on every touch (iOS sometimes needs multiple gestures)
+document.addEventListener('touchstart', () => {
+  if (soundManager.audioContext && soundManager.audioContext.state === 'suspended') {
+    soundManager.audioContext.resume().catch(()=>{});
+  }
+}, { passive: true });
 
 // On mobile, hide mute button text to save space, also hide fullscreen
 if (isMobile) {
