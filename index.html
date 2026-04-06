@@ -80,17 +80,11 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
   #start-btn { padding: 10px 30px !important; font-size: 16px !important; }
   .controls-help { display: none !important; }
 
-  /* === GAMEPLAY: game canvas fills viewport, no border === */
+  /* === GAMEPLAY: game canvas sized by JS, no border === */
   canvas#game {
     border: none !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100dvh !important;
-    height: 100vh !important;
     z-index: 1 !important;
   }
   /* Keep preview canvases inside hero cards small */
@@ -160,7 +154,7 @@ canvas { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rg
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v3.7</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v3.8</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -943,22 +937,25 @@ const ctx = canvas.getContext('2d');
 function resizeCanvas() {
   const w = window.innerWidth, h = window.innerHeight;
   const aspect = 1200 / 800;
-  if (isMobile) {
-    // On mobile: stretch to fill entire viewport (controls overlay on top)
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
-    canvas.style.position = 'fixed';
-    canvas.style.left = '0px';
-    canvas.style.top = '0px';
+  let cw, ch;
+
+  if (w / h > aspect) {
+    // Screen is wider than game — fit to height, center horizontally
+    ch = h;
+    cw = Math.floor(h * aspect);
   } else {
-    let scale;
-    if (w / h > aspect) {
-      scale = h / 800;
-    } else {
-      scale = w / 1200;
-    }
-    canvas.style.width = Math.floor(1200 * scale) + 'px';
-    canvas.style.height = Math.floor(800 * scale) + 'px';
+    // Screen is taller than game — fit to width, center vertically
+    cw = w;
+    ch = Math.floor(w / aspect);
+  }
+
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+
+  if (isMobile) {
+    canvas.style.position = 'fixed';
+    canvas.style.left = Math.floor((w - cw) / 2) + 'px';
+    canvas.style.top = Math.floor((h - ch) / 2) + 'px';
   }
 }
 window.addEventListener('resize', resizeCanvas);
