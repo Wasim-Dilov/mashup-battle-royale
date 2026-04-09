@@ -157,7 +157,7 @@ canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v4.1</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v4.2</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -946,14 +946,12 @@ const ctx = canvas.getContext('2d');
 function resizeCanvas() {
   const w = window.innerWidth || document.documentElement.clientWidth;
   const h = window.innerHeight || document.documentElement.clientHeight;
+  // Canvas internal resolution is ALWAYS 1200x800 — keeps all HUD/camera math consistent
+  canvas.width = 1200;
+  canvas.height = 800;
 
   if (isMobile) {
-    // Mobile: fill the ENTIRE screen — adjust internal canvas resolution to match screen ratio
-    // Keep height at 800, scale width to match actual screen aspect ratio
-    const screenAspect = w / h;
-    canvas.width = Math.round(800 * screenAspect);
-    canvas.height = 800;
-    // CSS: fill viewport edge-to-edge
+    // Mobile: stretch canvas to fill the entire screen (accepts slight aspect distortion)
     canvas.style.position = 'fixed';
     canvas.style.left = '0px';
     canvas.style.top = '0px';
@@ -961,9 +959,7 @@ function resizeCanvas() {
     canvas.style.height = h + 'px';
     canvas.style.margin = '0';
   } else {
-    // Desktop: fixed 1200x800, let flexbox center it
-    canvas.width = 1200;
-    canvas.height = 800;
+    // Desktop: let flexbox center it, preserve aspect ratio
     canvas.style.position = '';
     canvas.style.left = '';
     canvas.style.top = '';
