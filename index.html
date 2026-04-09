@@ -6,7 +6,7 @@
 <title>MASHUP BATTLE ROYALE!</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #1a3a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; position: relative; margin: 0; padding: 0; }
+body { background: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; position: relative; margin: 0; padding: 0; }
 canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40px rgba(233,69,96,0.4); image-rendering: pixelated; touch-action: none; display: block; }
 #ui-overlay { position: absolute; top:0;left:0;right:0;bottom:0; display:flex;justify-content:center;align-items:center; pointer-events:none; z-index:20; }
 #ui-overlay > * { pointer-events: auto; }
@@ -159,7 +159,7 @@ canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v4.3</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v4.4</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -194,6 +194,30 @@ canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40
 </div>
 
 <script>
+// ========== ON-SCREEN ERROR HANDLER (mobile debug) ==========
+(function(){
+  function showErr(msg) {
+    try {
+      let box = document.getElementById('err-box');
+      if (!box) {
+        box = document.createElement('div');
+        box.id = 'err-box';
+        box.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#900;color:#fff;font:12px monospace;padding:8px;z-index:9999;max-height:40vh;overflow:auto;white-space:pre-wrap;border-bottom:2px solid #fff;';
+        box.onclick = function(){ box.style.display='none'; };
+        document.body && document.body.appendChild(box);
+      }
+      box.textContent += msg + '\n\n';
+      box.style.display = 'block';
+    } catch(e) {}
+  }
+  window.addEventListener('error', function(e) {
+    showErr('ERROR: ' + (e.message||'?') + '\nAt: ' + (e.filename||'?') + ':' + (e.lineno||'?') + ':' + (e.colno||'?') + (e.error && e.error.stack ? '\n' + e.error.stack : ''));
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    showErr('PROMISE REJECT: ' + (e.reason && (e.reason.stack || e.reason.message) || e.reason));
+  });
+})();
+
 // ========== ENHANCED 8-BIT SPRITE SYSTEM ==========
 // 16 wide x 20 tall pixel sprites with richer detail
 // Legend per hero palette: 0=transparent, 1-9,a-f = colors
@@ -964,12 +988,24 @@ function resizeCanvas() {
   canvas.height = 800;
 
   if (isMobile) {
-    // Mobile: stretch canvas to fill the entire screen (accepts slight aspect distortion)
+    // Mobile: letterbox canvas to fit screen while PRESERVING 3:2 aspect ratio
+    const gameAspect = 1200 / 800; // 1.5
+    const screenAspect = w / h;
+    let cw, ch;
+    if (screenAspect > gameAspect) {
+      // Screen is wider than game — fit by height, pillarbox sides
+      ch = h;
+      cw = h * gameAspect;
+    } else {
+      // Screen is taller than game — fit by width, letterbox top/bottom
+      cw = w;
+      ch = w / gameAspect;
+    }
     canvas.style.position = 'fixed';
-    canvas.style.left = '0px';
-    canvas.style.top = '0px';
-    canvas.style.width = w + 'px';
-    canvas.style.height = h + 'px';
+    canvas.style.left = Math.round((w - cw) / 2) + 'px';
+    canvas.style.top = Math.round((h - ch) / 2) + 'px';
+    canvas.style.width = cw + 'px';
+    canvas.style.height = ch + 'px';
     canvas.style.margin = '0';
   } else {
     // Desktop: let flexbox center it, preserve aspect ratio
