@@ -125,6 +125,8 @@ canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40
 </style>
 </head>
 <body>
+<!-- iOS silent-switch unlock: tiny silent WAV loop. Forces audio session to "media" so Web Audio plays even with ringer off. -->
+<audio id="ios-silent-unlock" loop playsinline webkit-playsinline preload="auto" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
 <canvas id="game" width="1200" height="800"></canvas>
 <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶ FULLSCREEN</button>
 <button id="mute-btn" onclick="toggleMute()">🔊 SOUND ON</button>
@@ -157,7 +159,7 @@ canvas#game { border: 3px solid #e94560; border-radius: 12px; box-shadow: 0 0 40
       <span>V</span> Shield (5s, 2 uses) &nbsp;|&nbsp;
       <span>Shift</span> Dash
     </div>
-    <div style="color:#444;font-size:9px;margin-top:8px;">v4.2</div>
+    <div style="color:#444;font-size:9px;margin-top:8px;">v4.3</div>
     <div class="creator-credit">Created by Ognyan Dilov</div>
   </div>
   <div id="game-over">
@@ -718,27 +720,38 @@ class SoundManager {
       if (!this.audioContext) {
         this.audioContext = new AC();
         this.masterGain = this.audioContext.createGain();
+        // Mobile: boost master gain to 2.0 — phone speakers are quiet; desktop stays at 1.0
+        const mobileCheck = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        this.masterGain.gain.value = mobileCheck ? 2.0 : 1.0;
         this.masterGain.connect(this.audioContext.destination);
+        // Play silent buffer IMMEDIATELY (synchronous) to unlock iOS/Android audio
+        try {
+          const buf = this.audioContext.createBuffer(1, 1, 22050);
+          const src = this.audioContext.createBufferSource();
+          src.buffer = buf;
+          src.connect(this.audioContext.destination);
+          src.start(0);
+        } catch(e) {}
       }
       // Always try to resume (mobile requires this in a user gesture)
       if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume().then(() => {
-          // Play a tiny silent buffer to fully unlock audio on iOS/Android
-          try {
-            const buf = this.audioContext.createBuffer(1, 1, 22050);
-            const src = this.audioContext.createBufferSource();
-            src.buffer = buf;
-            src.connect(this.audioContext.destination);
-            src.start(0);
-          } catch(e) {}
-        }).catch(()=>{});
+        this.audioContext.resume().catch(()=>{});
+      }
+      // Unlock the iOS silent-switch workaround via the hidden <audio> element
+      const silentEl = document.getElementById('ios-silent-unlock');
+      if (silentEl && silentEl.paused) {
+        silentEl.play().catch(()=>{});
       }
     } catch(e) { console.warn('Audio init failed:', e); }
   }
   
   playSound(type, volume = 0.3) {
     if (this.muted || !this.audioContext) return;
-    if (this.audioContext.state === 'suspended') this.audioContext.resume();
+    // If context is suspended (mobile before first unlock), try to resume and skip this sound
+    if (this.audioContext.state !== 'running') {
+      this.audioContext.resume().catch(()=>{});
+      return;
+    }
     try {
       const ctx = this.audioContext;
       const now = ctx.currentTime;
