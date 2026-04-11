@@ -2689,7 +2689,6 @@ class Fighter {
           }
         });
         crates.forEach(c=>{if(!c.alive)return;if(dist(this,c)<this.hero.superRange)c.takeDamage(this.hero.superDamage*dmgMult,this);});
-  hazards.forEach(h=>{drawables.push({y:h.y||0,draw:()=>h.draw()});});
       }
       // Hero-specific super burst particles
       const heroColors={blazeKnight:['#ff4400','#ffaa00','#ff6600'],frostbyte:['#00ccff','#aaeeff','#0066ff'],zapWizard:['#9900ff','#cc66ff','#ff00ff'],shadowNinja:['#333','#666','#999'],captainCosmos:['#ff0066','#ff6699','#ffaacc'],rexTitan:['#44ff44','#88ff88','#00cc00'],banitsa:['#e8c35a','#d4a43a','#f5e6b8'],lebronJames:['#fdb927','#552583','#ffffff']};
@@ -3584,6 +3583,7 @@ function draw() {
   trees.forEach(t=>drawables.push({y:t.y+10,draw:()=>t.draw()}));
   crates.forEach(c=>{if(c.alive)drawables.push({y:c.y,draw:()=>c.draw()});});
   powerups.forEach(p=>{if(p.alive)drawables.push({y:p.y,draw:()=>p.draw()});});
+  hazards.forEach(h=>{if(h.alive!==false)drawables.push({y:h.y||0,draw:()=>h.draw()});});
   drawables.sort((a,b)=>a.y-b.y).forEach(d=>d.draw());
 
   // Damage numbers
