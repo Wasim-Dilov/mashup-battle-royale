@@ -162,6 +162,7 @@ resizeCanvas();
 
 let gameRunning=false, spectating=false, playerDeathPlace=0, fighters=[], projectiles=[], particles=[], damageNumbers=[];
 let countdownTimer=0, countdownActive=false;
+let dropPhase=false, dropTimer=0, dropDelay=0;
 let selectedHero=-1, playerIndex=0, shrinkTimer=0;
 let arenaRadius=currentMap.size.radius, arenaCenterX=currentMap.size.centerX, arenaCenterY=currentMap.size.centerY;
 let frameCount=0, killfeed=[], shakeX=0, shakeY=0;
