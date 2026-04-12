@@ -46,6 +46,13 @@ const TITLE_FONT = SHOWDOWN_THEME.textStyles.titleFont;
 
 // ========== MOBILE DETECTION (must be before resizeCanvas) ==========
 const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+const deviceMemory = navigator.deviceMemory || 4;
+const lowPerfMode = isMobile && deviceMemory <= 4;
+const AMBIENT_PARTICLE_TARGET = lowPerfMode ? 14 : (isMobile ? 18 : 30);
+const MAX_EFFECT_PARTICLES = lowPerfMode ? 170 : (isMobile ? 240 : 380);
+const MAX_DAMAGE_NUMBERS = lowPerfMode ? 16 : (isMobile ? 22 : 32);
+const MAX_KILLFEED_ITEMS = 5;
+const CONFETTI_COUNT = lowPerfMode ? 90 : (isMobile ? 130 : 200);
 let touchJoystick = { active: false, startX: 0, startY: 0, dx: 0, dy: 0, id: null };
 let touchButtons = { attack: false, super: false, shield: false, dash: false };
 let inputController = null;
@@ -170,6 +177,40 @@ let trees=[], crates=[], powerups=[];
 let matchStartTime=0, matchEndTime=0, matchTimerRunning=false;
 let confetti=[], confettiActive=false;
 let leaderboard=[];
+let gameLoopScheduled=false;
+let arenaBackdropCache=null;
+let arenaBackdropCacheKey='';
+
+function resetArenaBackdropCache() {
+  arenaBackdropCache = null;
+  arenaBackdropCacheKey = '';
+}
+
+function ensureArenaBackdropCache() {
+  const cacheKey = `${currentMap.id}:${arenaCenterX}:${arenaCenterY}:${arenaRadius}`;
+  if (arenaBackdropCache && arenaBackdropCacheKey === cacheKey) return;
+  const backdropCanvas = document.createElement('canvas');
+  backdropCanvas.width = 1200;
+  backdropCanvas.height = 800;
+  const backdropCtx = backdropCanvas.getContext('2d');
+  drawArenaBackdrop({
+    ctx: backdropCtx,
+    arenaCenterX,
+    arenaCenterY,
+    arenaRadius,
+    terrainSeeds,
+    frameCount: 0,
+    theme: SHOWDOWN_THEME
+  });
+  arenaBackdropCache = backdropCanvas;
+  arenaBackdropCacheKey = cacheKey;
+}
+
+function ensureGameLoopRunning() {
+  if (gameLoopScheduled) return;
+  gameLoopScheduled = true;
+  requestAnimationFrame(gameLoop);
+}
 // ========== ROUNDS SYSTEM ==========
 let currentRound = 1;
 let seriesScore = { player: 0, ai: 0 };
@@ -2041,6 +2082,7 @@ function startNextRound() {
   fighters=[];projectiles=[];particles=[];damageNumbers=[];killfeed=[];powerups=[];ambientParticles=[];
   arenaRadius=currentMap.size.radius;arenaCenterX=currentMap.size.centerX;arenaCenterY=currentMap.size.centerY;frameCount=0;shrinkTimer=0;
   terrainSeeds=null;
+  resetArenaBackdropCache();
   confetti=[];confettiActive=false;
   matchStartTime=Date.now();matchEndTime=0;matchTimerRunning=true;
   killStreakCount=0;killStreakTimer=0;killStreakFlash=0;slowMoTimer=0;slowMoRate=1;
@@ -2056,7 +2098,7 @@ function startNextRound() {
   playerIndex=0;
   countdownTimer=180;
   countdownActive=true;
-  requestAnimationFrame(gameLoop);
+  ensureGameLoopRunning();
 }
 
 function startGame() {
@@ -2077,6 +2119,7 @@ function startGame() {
   fighters=[];projectiles=[];particles=[];damageNumbers=[];killfeed=[];powerups=[];ambientParticles=[];
   arenaRadius=currentMap.size.radius;arenaCenterX=currentMap.size.centerX;arenaCenterY=currentMap.size.centerY;frameCount=0;shrinkTimer=0;
   terrainSeeds=null;
+  resetArenaBackdropCache();
   confetti=[];confettiActive=false;
   matchStartTime=Date.now();matchEndTime=0;matchTimerRunning=true;
   killStreakCount=0;killStreakTimer=0;killStreakFlash=0;slowMoTimer=0;slowMoRate=1;
@@ -2099,13 +2142,12 @@ function startGame() {
   // Start countdown before game begins
   countdownTimer = 180; // 3 seconds at 60fps
   countdownActive = true;
-  requestAnimationFrame(gameLoop);
+  ensureGameLoopRunning();
 }
 
 // ========== AMBIENT PARTICLES SYSTEM ==========
 function updateAmbientParticles(){
-  // Maintain ~30 floating ambient particles
-  while(ambientParticles.length<30){
+  while(ambientParticles.length<AMBIENT_PARTICLE_TARGET){
     const angle=Math.random()*Math.PI*2;
     const distance=Math.random()*arenaRadius*0.8;
     const x=arenaCenterX+Math.cos(angle)*distance;
@@ -2153,7 +2195,7 @@ function updateAmbientParticles(){
 function spawnConfetti() {
   confetti=[];confettiActive=true;
   const colors=['#ffd700','#e94560','#0ff','#44ff44','#ff6600','#ff44ff','#4488ff','#ffee00'];
-  for(let i=0;i<200;i++){
+  for(let i=0;i<CONFETTI_COUNT;i++){
     confetti.push({
       x:Math.random()*canvas.width,
       y:-Math.random()*400-20,
@@ -2207,6 +2249,7 @@ function getMatchTime(){
 
 // ========== GAME LOOP ==========
 function gameLoop() {
+  gameLoopScheduled = false;
   // Handle drop phase
   if (dropPhase) {
     dropTimer--;
@@ -2242,7 +2285,7 @@ function gameLoop() {
         soundManager.setMusicMode('battle');
       }
     }
-    if(!gameRunning){updateConfetti();draw();requestAnimationFrame(gameLoop);return;}
+    if(!gameRunning){updateConfetti();draw();ensureGameLoopRunning();return;}
   // Slow-mo effect
   if(slowMoTimer>0){slowMoTimer--;if(slowMoTimer<=0)slowMoRate=1;}
   // Kill streak timer
@@ -2258,7 +2301,10 @@ function gameLoop() {
   crates=crates.filter(c=>c.alive);
   particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=0.95;p.vy*=0.95;p.life--;return p.life>0;});
   damageNumbers=damageNumbers.filter(d=>{d.y-=0.8;d.life--;return d.life>0;});
+  if(particles.length>MAX_EFFECT_PARTICLES) particles=particles.slice(-MAX_EFFECT_PARTICLES);
+  if(damageNumbers.length>MAX_DAMAGE_NUMBERS) damageNumbers=damageNumbers.slice(-MAX_DAMAGE_NUMBERS);
   killfeed.forEach(k=>k.time--);killfeed=killfeed.filter(k=>k.time>0);
+  if(killfeed.length>MAX_KILLFEED_ITEMS) killfeed=killfeed.slice(-MAX_KILLFEED_ITEMS);
     // Captain Cosmos gravity well effect
   fighters.forEach(f => {
     if (!f.alive || f.hero.passive !== "Gravity Well") return;
@@ -2430,7 +2476,7 @@ function gameLoop() {
   }
   draw();
   if(inputController) inputController.endFrame();
-  requestAnimationFrame(gameLoop);
+  ensureGameLoopRunning();
 }
 
 // ========== TERRAIN SEED DATA (generated once) ==========
@@ -2458,15 +2504,20 @@ function draw() {
   ctx.translate(-cameraX + shakeX/cameraZoom, -cameraY + shakeY/cameraZoom);
 
   generateTerrainSeeds();
-  drawArenaBackdrop({
-    ctx,
-    arenaCenterX,
-    arenaCenterY,
-    arenaRadius,
-    terrainSeeds,
-    frameCount,
-    theme: SHOWDOWN_THEME
-  });
+  ensureArenaBackdropCache();
+  if (arenaBackdropCache) {
+    ctx.drawImage(arenaBackdropCache, 0, 0);
+  } else {
+    drawArenaBackdrop({
+      ctx,
+      arenaCenterX,
+      arenaCenterY,
+      arenaRadius,
+      terrainSeeds,
+      frameCount,
+      theme: SHOWDOWN_THEME
+    });
+  }
 
   // Ambient particles (fireflies, dust)
   ambientParticles.forEach(ap=>{
@@ -2995,6 +3046,7 @@ function quickReplay() {
   fighters = []; projectiles = []; particles = []; damageNumbers = []; killfeed = []; powerups = []; ambientParticles=[];
   arenaRadius = currentMap.size.radius; arenaCenterX = currentMap.size.centerX; arenaCenterY = currentMap.size.centerY; frameCount = 0; shrinkTimer = 0;
   terrainSeeds = null;
+  resetArenaBackdropCache();
   confetti=[]; confettiActive=false;
   matchStartTime=Date.now(); matchEndTime=0; matchTimerRunning=true;
   killStreakCount=0;killStreakTimer=0;killStreakFlash=0;slowMoTimer=0;slowMoRate=1;
@@ -3013,7 +3065,7 @@ function quickReplay() {
   dropDelay = 0;
   countdownTimer = 180;
   countdownActive = true;
-  requestAnimationFrame(gameLoop);
+  ensureGameLoopRunning();
 }
 
 
