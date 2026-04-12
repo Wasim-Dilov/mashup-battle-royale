@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Battle Royale pistol icon">
+  <defs>
+    <radialGradient id="bg" cx="42%" cy="30%" r="88%">
+      <stop offset="0%" stop-color="#ffe86a"/>
+      <stop offset="45%" stop-color="#ff8d3a"/>
+      <stop offset="100%" stop-color="#ff3b7a"/>
+    </radialGradient>
+    <linearGradient id="barrel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#66c3ff"/>
+      <stop offset="100%" stop-color="#2488ff"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#56617a"/>
+      <stop offset="100%" stop-color="#252b38"/>
+    </linearGradient>
+    <linearGradient id="grip" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#324155"/>
+      <stop offset="100%" stop-color="#141b25"/>
+    </linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#8f143d" flood-opacity="0.35"/>
+    </filter>
+    <clipPath id="clip">
+      <rect x="16" y="16" width="480" height="480" rx="108"/>
+    </clipPath>
+  </defs>
+
+  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bg)"/>
+  <g clip-path="url(#clip)">
+    <g opacity="0.24">
+      <circle cx="124" cy="126" r="26" fill="#ffffff"/>
+      <circle cx="388" cy="94" r="18" fill="#ffffff"/>
+      <circle cx="431" cy="167" r="12" fill="#ffffff"/>
+      <circle cx="84" cy="248" r="14" fill="#ffffff"/>
+      <circle cx="425" cy="279" r="20" fill="#ffffff"/>
+      <circle cx="118" cy="396" r="18" fill="#ffffff"/>
+      <circle cx="375" cy="405" r="26" fill="#ffffff"/>
+    </g>
+    <g opacity="0.28">
+      <path fill="#7bf2ff" d="M-6 363l111-53 20 51-102 75z"/>
+      <path fill="#7bf2ff" d="M396 41l85 42-47 79-81-53z"/>
+      <path fill="#7bf2ff" d="M192 482l41-118 61 22-8 104z"/>
+    </g>
+    <path fill="#ffe84d" d="M257 67l36 100-36 14-36-14z"/>
+    <path fill="#ffe84d" d="M467 149l-79 63-23-18 5-28z"/>
+    <path fill="#ffe84d" d="M500 341l-96-19-4-26 20-17z"/>
+    <path fill="#ffe84d" d="M342 502l-53-82 18-23 29 5z"/>
+    <path fill="#ffe84d" d="M159 502l17-98 30-4 16 25z"/>
+    <path fill="#ffe84d" d="M0 312l90-56 21 17-3 27z"/>
+    <path fill="#ffe84d" d="M32 138l92 27 4 28-21 17z"/>
+
+    <g filter="url(#shadow)" transform="translate(256 275) rotate(-16)">
+      <ellipse cx="10" cy="130" rx="148" ry="28" fill="#c52563" opacity="0.22" stroke="none"/>
+
+      <g stroke="#13213d" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="-124" y="-18" width="192" height="72" rx="22" fill="url(#body)"/>
+        <rect x="52" y="-6" width="118" height="32" rx="14" fill="url(#barrel)"/>
+        <rect x="-24" y="2" width="58" height="26" rx="11" fill="#93a0b5"/>
+        <rect x="-84" y="-3" width="33" height="26" rx="9" fill="#171e2a"/>
+        <path fill="#91a0ba" d="M-5 15h42l-8 24H2z"/>
+        <path fill="url(#grip)" d="M-41 42h66l16 118c2 15-10 28-25 28h-33c-13 0-23-10-24-23z"/>
+        <path fill="#243249" d="M-76 49l40 0-13 82-33-15z"/>
+        <path fill="#3c4861" d="M-97 -18h52l-26 -32h-34z"/>
+      </g>
+
+      <g transform="translate(175 11)" stroke="#ff8a1f" stroke-width="10" stroke-linejoin="round">
+        <path fill="#ffd64d" d="M0 0l36-20 11 28 32 4-25 22 10 31-30-14-24 22 4-34-27-15z"/>
+        <path fill="#fff4a3" d="M22 7l18-10 5 14 16 2-12 10 5 15-15-7-12 11 2-16-13-7z"/>
+      </g>
+    </g>
+  </g>
+</svg>
