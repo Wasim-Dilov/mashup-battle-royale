@@ -1,4 +1,4 @@
-import { HEROES, drawSprite, renderPreview } from '../content/heroes.js';
+import { HEROES, SW, SH, drawSprite, renderPreview } from '../content/heroes.js';
 import { SHOWDOWN_THEME, applyTheme } from '../content/theme.js';
 import { ASSET_MANIFEST } from '../content/assets.js';
 import { getDefaultMap } from '../content/maps.js';
